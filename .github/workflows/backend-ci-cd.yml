@@ -1,1 +1,26 @@
-TODO: implement in later steps
+permissions:
+  id-token: write
+  contents: read
+
+- name: Configure AWS credentials
+  uses: aws-actions/configure-aws-credentials@v4
+  with:
+    role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+    aws-region: ${{ secrets.AWS_REGION }}
+
+- name: Login to Amazon ECR
+  uses: aws-actions/amazon-ecr-login@v2
+
+- name: Build, tag, and push image to Amazon ECR
+  working-directory: backend
+  run: |
+    ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+    REGION=${{ secrets.AWS_REGION }}
+    REPO="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/starttech-backend"
+
+    docker build -t starttech-backend:${GITHUB_SHA} .
+    docker tag starttech-backend:${GITHUB_SHA} $REPO:${GITHUB_SHA}
+    docker tag starttech-backend:${GITHUB_SHA} $REPO:dev
+
+    docker push $REPO:${GITHUB_SHA}
+    docker push $REPO:dev
