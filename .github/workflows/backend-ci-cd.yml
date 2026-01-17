@@ -2,14 +2,25 @@ name: Backend CI/CD
 
 on:
   push:
+ HEAD
     branches: ["master"]
   pull_request:
+
+    branches: [ master ]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'backend/**'
+ 1b498b0 (Add real backend CI/CD workflow)
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
+ HEAD
   build-and-push-ecr:
     runs-on: ubuntu-latest
 
@@ -18,12 +29,23 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
+
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+ 1b498b0 (Add real backend CI/CD workflow)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
+ HEAD
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build, tag, and push image to Amazon ECR
@@ -39,3 +61,21 @@ jobs:
 
           docker push $REPO:${GITHUB_SHA}
           docker push $REPO:dev
+
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        working-directory: backend
+        run: |
+          docker build -t starttech-backend:latest .
+
+      - name: Tag image
+        run: |
+          docker tag starttech-backend:latest ${{ steps.login-ecr.outputs.registry }}/starttech-backend:latest
+
+      - name: Push to ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/starttech-backend:latest
+
+ 1b498b0 (Add real backend CI/CD workflow)
