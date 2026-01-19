@@ -32,6 +32,23 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Check secrets are present (safe)
+        shell: bash
+        run: |
+       if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
+       echo "AWS_ACCESS_KEY_ID is EMPTY"
+       exit 1
+       fi
+
+       if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
+       echo "AWS_SECRET_ACCESS_KEY is EMPTY"
+       exit 1
+       fi
+
+       echo "Secrets are present ✅"
+     echo "Access key starts with: ${{ secrets.AWS_ACCESS_KEY_ID }}" | cut -c1-4
+     echo "Region: ${{ secrets.AWS_REGION }}"
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
