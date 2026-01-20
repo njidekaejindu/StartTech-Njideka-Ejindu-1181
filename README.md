@@ -73,3 +73,9 @@ Deployment is fully automated using:
 .github/workflows/frontend-ci-cd.yml
 
 No manual deployment is required.
+
+## Evidence
+
+All implementation evidence can be found in:
+
+- /evidence folder in this repository
