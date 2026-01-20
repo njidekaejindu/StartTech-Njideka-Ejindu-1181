@@ -23,18 +23,23 @@ jobs:
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Debug lockfiles
+      - name: Debug paths
+        shell: bash
         run: |
+          echo "ROOT:"
           ls -la
+          echo "FRONTEND:"
           ls -la frontend
-          node -v
-          npm -v
-          cat frontend/package.json | head
-          cat frontend/package-lock.json | head
-
+          echo "frontend/package.json exists?"
+          test -f frontend/package.json && echo YES || echo NO
+          echo "frontend/package-lock.json exists?"
+          test -f frontend/package-lock.json && echo YES || echo NO
+          echo "root package-lock exists?"
+          test -f package-lock.json && echo YES || echo NO
+          
       - name: Install dependencies
-        working-directory: ./frontend
-        run: npm ci
+        working-directory: frontend
+        run: npm ci --no-audit --no-fund
 
       - name: Build
         working-directory: frontend
